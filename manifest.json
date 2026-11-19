@@ -1,0 +1,20 @@
+{
+  "name": "선아의 운동 퀘스트",
+  "short_name": "운동 퀘스트",
+  "description": "매일 퀘스트 카드를 눌러 완료 도장을 찍고 XP를 쌓는 게임형 운동·식단·인바디 대시보드",
+  "lang": "ko",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF9F4",
+  "theme_color": "#FFE3EC",
+  "icons": [
+    {
+      "src": "./assets/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
