@@ -314,7 +314,7 @@
     <form class="form" id="bodyForm" autocomplete="off" novalidate>
       <div class="frow">
         <div class="field"><label for="bDate">측정일</label><input type="date" id="bDate"></div>
-        <div class="field"><label for="bWeight">체중 (kg)</label><input type="number" id="bWeight" inputmode="decimal" step="any" min="30" max="120" placeholder="52.7"></div>
+        <div class="field"><label for="bWeight">체중 (kg)</label><input type="number" id="bWeight" inputmode="decimal" step="any" min="30" max="120" placeholder="51.8"></div>
       </div>
       <div class="frow three">
         <div class="field"><label for="bMuscle">골격근량</label><input type="number" id="bMuscle" inputmode="decimal" step="any" min="10" max="40" placeholder="21.8"></div>
@@ -427,9 +427,12 @@
     waist: { key: 'waist', label: '허리둘레', unit: 'in', goal: 24.0, step: 1, color: '#F7C96B' }
   };
 
+  var SEED_VER = 2; /* 기본 인바디 기록을 합쳐 넣는 버전 (숫자를 올리면 새 기본 기록만 한 번 더 채워요) */
+
   var DEFAULT_BODY = [
     { date: '2026-11-05', weight: 50.9, muscle: 20.7, fat: 24.5, waist: null },
-    { date: '2026-11-19', weight: 52.7, muscle: 21.8, fat: 23.1, waist: 27.0 }
+    { date: '2026-11-19', weight: 52.7, muscle: 21.8, fat: 23.1, waist: 27.0 },
+    { date: '2026-11-25', weight: 51.8, muscle: 21.6, fat: 22.8, waist: null }
   ];
 
   var DEFAULT_WORKOUTS = [
@@ -464,6 +467,19 @@
   var viewDate = todayKey();
   var bodyMetric = 'weight';
 
+  /* 저장된 기록은 그대로 두고, 새로 추가된 기본 기록 중 빠진 날짜만 채워 넣어요.
+     · 같은 날짜에 이미 기록이 있으면 기본값으로 덮어쓰지 않아요 (직접 입력한 값 우선)
+     · 버전(SEED_VER)이 올라갈 때 한 번만 합치므로, 지운 기록이 다시 살아나지 않아요 */
+  function withSeedBody(local, seedVer) {
+    var out = local.slice();
+    if (seedVer >= SEED_VER) return out;
+    DEFAULT_BODY.forEach(function (d) {
+      var has = out.some(function (r) { return r.date === d.date; });
+      if (!has) out.push(clone(d));
+    });
+    return out;
+  }
+
   function normalize(p, fresh) {
     p = (p && typeof p === 'object') ? p : {};
     var bodyArr = Array.isArray(p.body) ? p.body.filter(function (r) {
@@ -472,10 +488,12 @@
     var woArr = Array.isArray(p.workouts) ? p.workouts.filter(function (w) {
       return w && typeof w.date === 'string' && Array.isArray(w.entries);
     }) : null;
+    var seedVer = num(p.seed) != null ? num(p.seed) : 1;
     return {
       v: 1,
+      seed: SEED_VER,
       quests: (p.quests && typeof p.quests === 'object' && !Array.isArray(p.quests)) ? p.quests : {},
-      body: fresh || !bodyArr ? clone(DEFAULT_BODY) : bodyArr,
+      body: fresh || !bodyArr ? clone(DEFAULT_BODY) : withSeedBody(bodyArr, seedVer),
       workouts: fresh || !woArr ? clone(DEFAULT_WORKOUTS) : woArr
     };
   }
@@ -500,6 +518,14 @@
   function latestBody() {
     var r = sortedBody();
     return r.length ? r[r.length - 1] : {};
+  }
+  /* 오늘처럼 일부 항목을 안 잼 측정이 있으면, 그 항목은 마지막으로 잰 기록 값을 그래도 보여 줘요 */
+  function lastWith(key) {
+    var r = sortedBody();
+    for (var i = r.length - 1; i >= 0; i--) {
+      if (num(r[i][key]) != null) return r[i];
+    }
+    return null;
   }
   function isDone(k, id) { var d = state.quests[k]; return !!(d && d[id]); }
   function doneCount(k) {
@@ -686,7 +712,8 @@
     var base = rows.filter(function (r) { return r.date === CHALLENGE_START; })[0] || first;
     $('#goalSub').textContent = '8주 챌린지 · ' + ddayText();
     $('#goals').innerHTML = GOALS.map(function (g) {
-      var cur = num(latest[g.key]);
+      var lastFor = lastWith(g.key);
+      var cur = lastFor ? num(lastFor[g.key]) : null;
       var st = num(base[g.key]);
       var f0 = num(first[g.key]);
       if (st == null) st = cur;
