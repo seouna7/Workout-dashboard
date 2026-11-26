@@ -525,13 +525,20 @@
   function won(n) { return Math.round(n).toLocaleString('ko-KR'); }
   function compact(n) {
     n = Math.round(n);
-    if (Math.abs(n) >= 100000000) {
-      var eok = n / 100000000;
-      var eokTxt = eok >= 10 ? Math.round(eok) : (Math.round(eok * 100) / 100);
-      return '약 ' + eokTxt + '억 원';
-    }
-    if (Math.abs(n) >= 10000) return '약 ' + Math.round(n / 10000).toLocaleString('ko-KR') + '만 원';
-    return '약 ' + won(n) + '원';
+    var neg = n < 0; n = Math.abs(n);
+    var eok = Math.floor(n / 100000000);
+    var man = Math.round((n % 100000000) / 10000);
+    var s = '';
+    if (eok > 0) s += eok.toLocaleString('ko-KR') + '억 ';
+    if (man > 0) s += man.toLocaleString('ko-KR') + '만 ';
+    if (!s) return (neg ? '-약 ' : '약 ') + won(n) + '원';
+    return (neg ? '-약 ' : '약 ') + s.trim() + ' 원';
+  }
+  function compactShort(n) {
+    n = Math.round(n);
+    if (Math.abs(n) >= 100000000) return (n / 100000000).toFixed(2) + '억';
+    if (Math.abs(n) >= 10000) return Math.round(n / 10000).toLocaleString('ko-KR') + '만';
+    return won(n);
   }
   function usd(n, d) { return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: d == null ? 2 : d, maximumFractionDigits: d == null ? 2 : d }); }
   function pct(n) { var s = (n > 0 ? '+' : '') + Number(n).toFixed(2); return s + '%'; }
@@ -754,7 +761,7 @@
       off += len;
     });
     svg.innerHTML = html;
-    $('#donutTotal').textContent = compact(total(cats)).replace('약 ', '');
+    $('#donutTotal').textContent = compactShort(total(cats));
 
     $('#legend').innerHTML = cats.map(function (c) {
       var p = (c.amount / (t || 1)) * 100;
@@ -795,6 +802,14 @@
     var line = pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ');
     var area = line + ' L' + pts[pts.length - 1][0].toFixed(1) + ' ' + (H - 2) + ' L' + pts[0][0].toFixed(1) + ' ' + (H - 2) + ' Z';
     var lastP = pts[pts.length - 1];
+    function lbl(x) {
+      var dt = x.d.slice(5).replace('-', '/');
+      if (x.ts && h[0].d === h[h.length - 1].d) {
+        var tt = new Date(x.ts);
+        return pad2(tt.getHours()) + ':' + pad2(tt.getMinutes());
+      }
+      return dt;
+    }
     box.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">'
       + '<defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1">'
       + '<stop offset="0%" stop-color="#6FD3B4" stop-opacity=".34"/><stop offset="100%" stop-color="#6FD3B4" stop-opacity="0"/></linearGradient></defs>'
@@ -803,8 +818,8 @@
       + '<circle cx="' + lastP[0].toFixed(1) + '" cy="' + lastP[1].toFixed(1) + '" r="4.5" fill="#fff" stroke="#2F9B72" stroke-width="2.4"/>'
       + '</svg>'
       + '<div class="tiny muted" style="display:flex; justify-content:space-between; margin-top:2px">'
-      + '<span>' + h[0].d.slice(5).replace('-', '/') + ' · ' + compact(h[0].t) + '</span>'
-      + '<span>' + h[h.length - 1].d.slice(5).replace('-', '/') + ' · ' + compact(h[h.length - 1].t) + '</span></div>';
+      + '<span>' + lbl(h[0]) + ' · ' + compact(h[0].t) + '</span>'
+      + '<span>' + lbl(h[h.length - 1]) + ' · ' + compact(h[h.length - 1].t) + '</span></div>';
     $('#trendSub').textContent = '기록 ' + h.length + '개';
   }
 
@@ -1161,13 +1176,12 @@
 
   function pushHistory() {
     var t = total(state.data.cats);
-    var k = todayKey();
     var h = state.data.history || (state.data.history = []);
-    var found = null;
-    for (var i = 0; i < h.length; i++) if (h[i].d === k) found = h[i];
-    if (found) found.t = t;
-    else h.push({ d: k, t: t });
-    h.sort(function (a, b) { return a.d < b.d ? -1 : 1; });
+    h.push({ d: todayKey(), t: t, ts: new Date().toISOString() });
+    h.sort(function (a, b) {
+      if (a.d !== b.d) return a.d < b.d ? -1 : 1;
+      return (a.ts || '') < (b.ts || '') ? -1 : 1;
+    });
     if (h.length > 400) state.data.history = h.slice(-400);
   }
 
