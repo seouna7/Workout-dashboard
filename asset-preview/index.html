@@ -265,8 +265,13 @@
     .wrap{max-width:1080px; padding:20px 22px 0}
     .grid{display:grid; grid-template-columns:1fr 1fr; gap:0 14px; align-items:start}
     .grid > .card{margin-bottom:14px}
-    .hero{margin-bottom:14px; padding:20px 24px 18px}
-    .total .v{font-size:36px}
+    .hero{margin-bottom:14px; padding:20px 24px 18px; display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:32px; align-items:start}
+    .hero-top{grid-column:1; grid-row:1}
+    .xpbar{grid-column:1; grid-row:2}
+    .total{grid-column:2; grid-row:1 / span 2; margin-top:0; text-align:right; align-self:center}
+    .total .k{justify-content:flex-end}
+    .total .v{font-size:38px}
+    .total .sub{justify-content:flex-end}
     .wide{grid-column:1 / -1}
     .qa{max-width:520px; margin-left:auto; margin-right:auto}
     .banner{max-width:760px; margin:0 auto 14px}
@@ -783,8 +788,8 @@
     var box = $('#trendBox');
     if (h.length < 2) {
       box.innerHTML = '<svg viewBox="0 0 320 96" preserveAspectRatio="none">'
-        + '<path d="M6 70 C 60 62, 110 76, 160 58 S 260 40, 314 44" fill="none" stroke="#E7DED3" stroke-width="2" stroke-dasharray="5 6"/>'
-        + '<circle cx="314" cy="44" r="4" fill="#DCD2C6"/></svg>'
+        + '<path d="M8 50 L312 50" fill="none" stroke="#E7DED3" stroke-width="2" stroke-dasharray="3 7" stroke-linecap="round"/>'
+        + '<circle cx="312" cy="50" r="4" fill="#DCD2C6"/></svg>'
         + '<div class="trend-empty">아직 기록이 1개예요. 금액을 수정하면 여기에 추이가 쌓여요.</div>';
       $('#trendSub').textContent = '기록 1개';
       return;
