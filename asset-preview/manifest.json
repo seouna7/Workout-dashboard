@@ -1,0 +1,12 @@
+{
+  "name": "선아의 자산 퀘스트",
+  "short_name": "자산 퀘스트",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FFFBF6",
+  "theme_color": "#E9FBF3",
+  "lang": "ko",
+  "icons": [
+    { "src": "./assets/icon-180.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+  ]
+}
