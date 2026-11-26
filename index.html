@@ -152,6 +152,40 @@
   @keyframes ring{0%{box-shadow:0 0 0 0 rgba(255,158,181,.5)} 70%{box-shadow:0 0 0 11px rgba(255,158,181,0)} 100%{box-shadow:0 0 0 0 rgba(255,158,181,0)}}
   @keyframes pop{0%{transform:scale(.6)} 60%{transform:scale(1.12)} 100%{transform:scale(1)}}
 
+  /* ---------- DAILY ROUTINE ---------- */
+  .routine{position:relative; display:flex; gap:11px; padding:8px; border-radius:19px; background:#fff;
+    border:1.5px solid var(--line); box-shadow:0 4px 12px rgba(214,170,150,.10); overflow:hidden;
+    transition:border-color .28s ease, box-shadow .28s ease, background .28s ease}
+  .routine.done{border-color:#F7A8BE; background:linear-gradient(180deg,#FFFBFC,#FFF7FA);
+    box-shadow:0 0 0 3px rgba(247,168,190,.18), 0 8px 20px rgba(229,104,139,.18)}
+  .rt-thumb{position:relative; flex:0 0 96px; width:96px; aspect-ratio:1/1; border-radius:14px; overflow:hidden; background:#FDF6EF; display:block}
+  .rt-thumb img{width:100%; height:100%; object-fit:cover; display:block}
+  .rt-play{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:34px; height:34px; border-radius:50%;
+    background:rgba(255,255,255,.92); color:#E5688B; display:grid; place-items:center; font-size:13px; padding-left:2px;
+    box-shadow:0 3px 10px rgba(180,120,150,.28)}
+  .rt-dur{position:absolute; left:6px; bottom:6px; background:rgba(59,51,56,.74); color:#fff; font-size:9.5px; font-weight:800;
+    padding:2px 6px; border-radius:7px; letter-spacing:-.2px}
+  .rt-body{min-width:0; flex:1 1 auto; display:flex; flex-direction:column; gap:3px; padding:3px 3px 3px 0}
+  .rt-title{font-size:13.5px; font-weight:900; letter-spacing:-.35px; line-height:1.25}
+  .rt-meta{font-size:10.5px; color:var(--muted); letter-spacing:-.2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .rt-tags{display:flex; flex-wrap:wrap; gap:4px; margin-top:1px}
+  .rt-tag{font-size:9.5px; font-weight:800; color:#A98FA0; background:#FBF2F6; border-radius:6px; padding:1px 5px; letter-spacing:-.2px}
+  .rt-actions{display:flex; gap:6px; margin-top:auto; padding-top:5px}
+  .rt-link,.rt-check{border-radius:10px; font-size:11px; font-weight:800; padding:8px 10px; letter-spacing:-.2px; line-height:1;
+    display:inline-flex; align-items:center; justify-content:center; gap:4px; text-decoration:none; border:none; font-family:inherit}
+  .rt-link{background:#FFE3EC; color:#C9506E; flex:0 0 auto}
+  .rt-check{background:#F6EDE6; color:#8A6C77; flex:1 1 auto; cursor:pointer; transition:.2s}
+  .rt-check:active{transform:scale(.96)}
+  .routine.done .rt-check{background:linear-gradient(135deg,#FF9EB5,#C7A6F5); color:#fff; box-shadow:0 3px 10px rgba(233,139,166,.35)}
+  .rt-stat{font-size:10px; color:var(--faint); font-variant-numeric:tabular-nums; letter-spacing:-.2px; padding-top:2px}
+  .routine .stamp{left:56px; top:50%}
+  .routine.done .stamp{opacity:1; transform:translate(-50%,-50%) rotate(-12deg) scale(1); animation:stampIn .48s cubic-bezier(.34,1.6,.64,1)}
+  .routine.done .rt-thumb img{filter:saturate(1.06)}
+  @media (max-width:359px){
+    .rt-thumb{flex-basis:84px; width:84px}
+    .routine .stamp{left:50px}
+  }
+
   /* ---------- WEEK ---------- */
   .week{display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-top:11px}
   .wd{border:none; background:#FDF8F4; border-radius:13px; padding:6px 0 7px; cursor:pointer; transition:.2s; font:inherit}
@@ -295,6 +329,12 @@
   </section>
 
   <section class="card">
+    <h2>🍑 매일 둔근 루틴 <span class="h-sub" id="routineSub">SomiFit · 8분</span></h2>
+    <div class="qsub">매일 8분 · 볼륨감에 집중하는 중둔근·힙딥 운동</div>
+    <div id="routineCard"></div>
+  </section>
+
+  <section class="card">
     <h2>최근 7일 달성률 <span class="h-sub" id="weekSub">—</span></h2>
     <div class="week" id="week"></div>
     <div class="wlegend"><span>O 5/5</span><span>△ 1~4</span><span>X 0</span></div>
@@ -388,6 +428,15 @@
     { id: 'water', num: 5, title: '물 2L + 간식 15g', time: '하루 종일', img: 'quest-water.png', wide: true,
       menu: ['물 2L 이상', '견과류 15g', '다크초콜릿 70% 1조각'], foot: '수분은 뒷구리 부종부터 빠져요' }
   ];
+
+  /* 매일 루틴: SomiFit 8분 중둔근·힙딥 운동 (유튜브) */
+  var ROUTINE = {
+    id: 'glute', xp: 10,
+    title: '볼륨감 집중 둔근운동',
+    channel: 'SomiFit', dur: '8분', img: 'routine-glute.png',
+    url: 'https://youtu.be/xua8mUT0IFQ',
+    tags: ['중둔근', '힙딥 개선']
+  };
 
   var TEMPLATES = {
     A: { label: 'A데이', short: '등·뒷구리', items: [
@@ -493,6 +542,7 @@
       v: 1,
       seed: SEED_VER,
       quests: (p.quests && typeof p.quests === 'object' && !Array.isArray(p.quests)) ? p.quests : {},
+      glute: (p.glute && typeof p.glute === 'object' && !Array.isArray(p.glute)) ? p.glute : {},
       body: fresh || !bodyArr ? clone(DEFAULT_BODY) : withSeedBody(bodyArr, seedVer),
       workouts: fresh || !woArr ? clone(DEFAULT_WORKOUTS) : woArr
     };
@@ -540,6 +590,9 @@
       xp += n * 20;
       if (n === 5) xp += 20;
     });
+    Object.keys(state.glute).forEach(function (k) {
+      if (state.glute[k]) xp += ROUTINE.xp;
+    });
     return xp;
   }
   function levelOf() { return Math.floor(totalXP() / 100) + 1; }
@@ -548,6 +601,20 @@
     if (doneCount(keyOf(d)) < 5) d.setDate(d.getDate() - 1);
     var n = 0, guard = 0;
     while (guard++ < 500 && doneCount(keyOf(d)) === 5) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  }
+  function gluteOn(k) { return !!state.glute[k]; }
+  function gluteStreak() {
+    var d = new Date(); d.setHours(12, 0, 0, 0);
+    if (!gluteOn(keyOf(d))) d.setDate(d.getDate() - 1);
+    var n = 0, guard = 0;
+    while (guard++ < 500 && gluteOn(keyOf(d))) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  }
+  function gluteWeek() {
+    var d = new Date(); d.setHours(12, 0, 0, 0);
+    var n = 0;
+    for (var i = 0; i < 7; i++) { if (gluteOn(keyOf(d))) n++; d.setDate(d.getDate() - 1); }
     return n;
   }
   function dayType(k) {
@@ -601,10 +668,10 @@
     trophyTimer = setTimeout(function () { t.classList.remove('show'); }, 3400);
   }
 
-  function floatXP(rect) {
+  function floatXP(rect, txt) {
     var s = document.createElement('span');
     s.className = 'xp-float';
-    s.textContent = '+20 XP';
+    s.textContent = txt || '+20 XP';
     s.style.left = (rect.left + rect.width / 2) + 'px';
     s.style.top = (rect.top + rect.height / 2) + 'px';
     document.body.appendChild(s);
@@ -769,6 +836,33 @@
     '</button>';
   }
 
+  function renderRoutine() {
+    var on = gluteOn(viewDate);
+    var isToday = viewDate === todayKey();
+    var stat = isToday
+      ? '이번 주 ' + gluteWeek() + '/7 · 연속 ' + gluteStreak() + '일'
+      : md(viewDate) + (on ? ' 완료 ✓' : ' 아직 미완료');
+    $('#routineCard').innerHTML =
+      '<div class="routine' + (on ? ' done' : '') + '">' +
+        '<a class="rt-thumb" href="' + ROUTINE.url + '" target="_blank" rel="noopener noreferrer" aria-label="유튜브에서 ' + ROUTINE.title + ' 영상 열기">' +
+          '<img src="./assets/' + ROUTINE.img + '" alt="" loading="lazy" decoding="async">' +
+          '<span class="rt-play" aria-hidden="true">▶</span>' +
+          '<span class="rt-dur">' + ROUTINE.dur + '</span>' +
+        '</a>' +
+        '<div class="rt-body">' +
+          '<div class="rt-title">' + ROUTINE.title + '</div>' +
+          '<div class="rt-meta">' + ROUTINE.channel + ' · 매일 8분</div>' +
+          '<div class="rt-tags">' + ROUTINE.tags.map(function (t) { return '<span class="rt-tag">' + t + '</span>'; }).join('') + '</div>' +
+          '<div class="rt-actions">' +
+            '<a class="rt-link" href="' + ROUTINE.url + '" target="_blank" rel="noopener noreferrer">▶ 영상 보기</a>' +
+            '<button type="button" class="rt-check" data-routine="' + ROUTINE.id + '" aria-pressed="' + on + '">' + (on ? '✓ 오늘 완료' : '오늘 완료 체크') + '</button>' +
+          '</div>' +
+          '<div class="rt-stat">' + stat + '</div>' +
+        '</div>' +
+        '<span class="stamp" aria-hidden="true">완료!<em>🍑</em></span>' +
+      '</div>';
+  }
+
   function renderQuests() {
     var isToday = viewDate === todayKey();
     var d = parseKey(viewDate);
@@ -782,6 +876,7 @@
     $('#questSub').textContent = n === 5
       ? '오늘 5개 퀘스트 완벽 달성! 🏆 내일도 이어가요'
       : '카드를 톡 누르면 완료 도장이 찍혀요 · 하루 1,400~1,500kcal · 단백질 90g';
+    renderRoutine();
   }
 
   function renderWeek() {
@@ -970,7 +1065,33 @@
     if (afterLvl > beforeLvl) setTimeout(function () { toast('레벨 업! 🎉 Lv.' + afterLvl); }, 650);
   }
 
+  /* ================= 매일 둔근 루틴 토글 ================= */
+  function toggleRoutine(el) {
+    if (viewDate > todayKey()) { toast('아직 오지 않은 날이에요 🙂'); return; }
+    var on = !gluteOn(viewDate);
+    var rect = el ? el.getBoundingClientRect() : null;
+    var beforeLvl = levelOf();
+    if (on) state.glute[viewDate] = true; else delete state.glute[viewDate];
+    save();
+    renderHeader();
+    renderRoutine();
+    if (on) {
+      try { if (navigator.vibrate) navigator.vibrate(12); } catch (err) {}
+      if (rect) floatXP(rect, '+' + ROUTINE.xp + ' XP');
+      var st = gluteStreak();
+      toast(st > 1 ? '둔근 루틴 완료! 🔥 ' + st + '일 연속' : '둔근 루틴 완료! 🍑');
+    }
+    var afterLvl = levelOf();
+    if (afterLvl > beforeLvl) setTimeout(function () { toast('레벨 업! 🎉 Lv.' + afterLvl); }, 650);
+  }
+
   /* ================= 이벤트 ================= */
+  $('#routineCard').addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('.rt-check') : null;
+    if (!b) return;
+    toggleRoutine(b);
+  });
+
   $('#questGrid').addEventListener('click', function (e) {
     var btn = e.target.closest ? e.target.closest('.quest') : null;
     if (!btn) return;
