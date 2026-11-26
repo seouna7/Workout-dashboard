@@ -625,18 +625,18 @@
     var cachedReal = readJSON(LS_REAL);
 
     if (key) {
-      try {
-        var opened = await unlock(key);
-        var norm = normalize(opened);
-        if (!norm) throw new Error('bad payload');
-        state.data = norm; state.mode = 'real';
-        writeJSON(LS_REAL, norm);
-        toast('내 자산 데이터를 열었어요');
-      } catch (e) {
-        if (cachedReal && normalize(cachedReal)) {
-          state.data = normalize(cachedReal); state.mode = 'real';
-          toast('이미 저장된 내 데이터로 열었어요');
-        } else {
+      if (cachedReal && normalize(cachedReal)) {
+        // 이 기기에 이미 열어 본 데이터가 있으면 사용자의 수정 내역을 덮어쓰지 않는다
+        state.data = normalize(cachedReal); state.mode = 'real';
+      } else {
+        try {
+          var opened = await unlock(key);
+          var norm = normalize(opened);
+          if (!norm) throw new Error('bad payload');
+          state.data = norm; state.mode = 'real';
+          writeJSON(LS_REAL, norm);
+          toast('내 자산 데이터를 열었어요');
+        } catch (e) {
           toast('키가 맞지 않아 데모로 열었어요');
         }
       }
