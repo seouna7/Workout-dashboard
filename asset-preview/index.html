@@ -96,7 +96,7 @@
 
   /* ---------- DONUT ---------- */
   .asset-top{display:flex; align-items:center; gap:12px; margin-top:8px}
-  .donut{position:relative; width:128px; height:128px; flex:0 0 128px}
+  .donut{position:relative; width:118px; height:118px; flex:0 0 118px}
   .donut svg{width:100%; height:100%; transform:rotate(-90deg)}
   .donut .ctr{position:absolute; inset:0; display:grid; place-content:center; text-align:center; line-height:1.25}
   .donut .ctr b{font-size:12.5px; font-weight:900; letter-spacing:-.4px}
@@ -105,9 +105,9 @@
   .lg{display:flex; align-items:center; gap:7px; padding:5px 4px; border-radius:10px; width:100%; text-align:left}
   .lg:active{background:var(--line2)}
   .lg .dot{width:9px; height:9px; border-radius:3px; flex:0 0 9px}
-  .lg .nm{font-size:12px; font-weight:700; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-  .lg .pct{font-size:10.5px; color:var(--muted); flex:0 0 auto}
-  .lg .am{font-size:11.5px; font-weight:800; letter-spacing:-.3px; flex:0 0 auto}
+  .lg .nm{font-size:11.5px; font-weight:700; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .lg .nm .pc{font-style:normal; font-size:9.5px; color:var(--muted); font-weight:700; margin-left:3px}
+  .lg .am{font-size:11px; font-weight:800; letter-spacing:-.3px; flex:0 0 auto; white-space:nowrap}
   .edit-hint{font-size:10.5px; color:var(--faint); margin-top:6px; text-align:right}
   .spark{display:block}
 
@@ -176,7 +176,8 @@
   .gauge .mark{position:absolute; top:2px; width:2px; height:26px; background:#fff; box-shadow:0 0 0 1px rgba(0,0,0,.06); border-radius:2px}
   .gauge .knob{position:absolute; top:-1px; transform:translateX(-50%); transition:left .6s cubic-bezier(.2,.8,.2,1)}
   .gauge .knob b{display:block; background:var(--ink); color:#fff; font-size:9.5px; font-weight:800; padding:2px 6px; border-radius:999px; white-space:nowrap}
-  .gauge .sc{position:absolute; left:0; right:0; bottom:-2px; display:flex; justify-content:space-between; font-size:9px; color:var(--faint)}
+  .gauge .sc{position:absolute; left:0; right:0; bottom:-2px; height:10px}
+  .gauge .sc span{position:absolute; top:0; transform:translateX(-50%); font-size:9px; color:var(--faint); white-space:nowrap}
   .tr-list{margin-top:10px; display:flex; flex-direction:column; gap:6px}
   .tr{display:flex; align-items:center; gap:9px; border:1px solid var(--line2); border-radius:12px; padding:8px 10px; background:#FEFCFA}
   .tr.hit{border-color:#F3D9A8; background:#FFFBEF}
@@ -391,7 +392,7 @@
           <i style="width:40%; background:#F1EEEA"></i>
         </div>
         <div class="knob" id="gaugeKnob" style="left:50%"><b id="gaugeLbl">$—</b></div>
-        <div class="sc"><span>$10</span><span>$15</span><span>$20</span><span>$25</span><span>$35</span></div>
+        <div class="sc"><span style="left:0">$10</span><span style="left:20%">$15</span><span style="left:40%">$20</span><span style="left:60%">$25</span><span style="left:100%">$35</span></div>
       </div>
       <div class="tr-list" id="trList"></div>
       <div class="prog" id="radarProg"><i></i><i></i><i></i><i></i></div>
@@ -767,8 +768,7 @@
       var p = (c.amount / (t || 1)) * 100;
       return '<button class="lg" data-cat="' + c.id + '">'
         + '<span class="dot" style="background:' + (COLORS[c.id] || '#D8D0C7') + '"></span>'
-        + '<span class="nm">' + c.emoji + ' ' + c.name + '</span>'
-        + '<span class="pct">' + p.toFixed(1) + '%</span>'
+        + '<span class="nm">' + c.emoji + ' ' + c.name + '<em class="pc">' + p.toFixed(1) + '%</em></span>'
         + '<span class="am">' + won(c.amount) + '</span></button>';
     }).join('');
 
