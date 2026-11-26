@@ -605,7 +605,10 @@
       { name: 'PBKDF2', salt: salt, iterations: iter, hash: 'SHA-256' },
       baseKey, { name: 'AES-GCM', length: 256 }, false, ['decrypt']
     );
-    var plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64ToBytes(vault.iv) }, aes, b64ToBytes(vault.ciphertext));
+    var plain = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: b64ToBytes(vault.iv), additionalData: new TextEncoder().encode('assetq-vault-v1') },
+      aes, b64ToBytes(vault.ciphertext)
+    );
     return JSON.parse(new TextDecoder().decode(plain));
   }
 
@@ -839,7 +842,7 @@
       var val, unit = '';
       if (sym === 'KRW=X') { val = q.price.toFixed(2); unit = '원'; }
       else if (sym === 'BTC-USD') { val = '$' + Math.round(q.price).toLocaleString('en-US'); }
-      else if (sym === '^KS11') { val = q.price.toFixed(2); }
+      else if (q.kind === 'stock') { val = '$' + q.price.toFixed(2); }
       else { val = q.price.toFixed(2); }
       var tag = (sym === 'VOO' || sym === 'QLD' || sym === 'SOXL') ? '<span class="tag">관심</span>' : '';
       var pos = Math.max(0, Math.min(100, (q.price / q.high52) * 100));
