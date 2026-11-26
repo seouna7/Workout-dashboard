@@ -941,8 +941,8 @@
     var qld = amt - voo;
     var vq = item('VOO'), qq = item('QLD');
     var fx = state.data.fx || 1343.9;
-    $('#vooAmt').textContent = '이번 달 ' + won(voo) + '원' + (vq ? ' ≈ ' + (voo / fx / vq.price).toFixed(2) + '주' : '');
-    $('#qldAmt').textContent = '이번 달 ' + won(qld) + '원' + (qq ? ' ≈ ' + (qld / fx / qq.price).toFixed(2) + '주' : '');
+    $('#vooAmt').textContent = won(voo) + '원' + (vq ? ' · ' + (voo / fx / vq.price).toFixed(2) + '주' : '');
+    $('#qldAmt').textContent = won(qld) + '원' + (qq ? ' · ' + (qld / fx / qq.price).toFixed(2) + '주' : '');
     var el = $('#monthlyAmt');
     if (el && document.activeElement !== el) el.value = won(amt);
   }
